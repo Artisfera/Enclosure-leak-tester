@@ -1,2 +1,2 @@
-# D6F
+# Enclosure leak tester
  Just messing around with a new microcontroller :)
