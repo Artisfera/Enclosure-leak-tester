@@ -8,4 +8,5 @@ target_sources(app PRIVATE
     src/adcin.c
     src/pwmout.c
     src/spiin.c
+    src/pid.c
 )
