@@ -74,14 +74,15 @@ int adc_read_flowrate(int *ml_min)
                 return err;
         }
 
-        *ml_min = (voltage_mv - 500) / 20;
+        //*ml_min = (voltage_mv - 500) / 20;
+        *ml_min = voltage_mv;
 
-        if (*ml_min > 100) {
+        /*if (*ml_min > 100) {
                 LOG_ERR("Flow is too HIGH! - %d ml/min", *ml_min);
         } else {
                 LOG_DBG("Voltage: %d mV", voltage_mv);
                 LOG_DBG("Flow: %d ml/min", *ml_min);
-        }
+        }*/
 
         return 0;
 }

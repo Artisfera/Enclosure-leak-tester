@@ -16,28 +16,29 @@ int main(void)
         adc_init();
         spi_init();
 
-        //float psi = 0;
+        float psi = 0.0f;
         float duty = 0;
         int ml_min = 0;
         //int monitoring_duration = 120000;
         int64_t prev_time = k_uptime_get();
 
 
-        float Kp = 0.005f;
-        float Ki = 0.002f;
-        float Kd = 0.1f;
+        float Kp = 200.0f;
+        float Ki = 200.0f;
+        float Kd = 5.0f;
 
-        float setPoint = 100.0f;
+        float setPoint = 0.15f;
         float integral = 0.0f;
         float derivative = 0.0f;
-                adc_read_flowrate(&ml_min);
-        float previousError = setPoint - ml_min;
+                spi_read_pressure(&psi);
+        float previousError = setPoint - psi;
         
 
         while(1) {
                 adc_read_flowrate(&ml_min);
+                spi_read_pressure(&psi);
 
-                float error = setPoint - ml_min;
+                float error = setPoint - psi;
                 float pTerm = Kp * error;
 
                 float dt = (float)k_uptime_delta(&prev_time) / 1000.0f;
@@ -49,9 +50,9 @@ int main(void)
                 previousError = error;
 
                 duty = pTerm + iTerm + dTerm;
-                duty = CLAMP(duty, 0.0f, 20.0f);
+                duty = CLAMP(duty, 0.0f, 50.0f);
                 pwm_set_percent(duty);
-                printf(">Flowrate:%d,setPoint:%.4f,error:%.4f,pTerm:%.4f,iTerm:%.4f,dTerm:%.4f,duty:%.4f\r\n", ml_min, setPoint, error, pTerm, iTerm, dTerm, duty);
+                printf(">Pressure:%.4f,setPoint:%.4f,error:%.4f,pTerm:%.4f,iTerm:%.4f,dTerm:%.4f,duty:%.4f,ml_min:%d\r\n", psi, setPoint, error, pTerm, iTerm, dTerm, duty, ml_min);
 
                 k_msleep(50);
         }
