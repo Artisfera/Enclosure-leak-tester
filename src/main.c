@@ -13,7 +13,18 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 int main(void)
 {
+    float psi = 0.0f;
+    float duty = 0.0f;
+    float l_min = 0.0f;
+    float pidTerm = 0.0f;
     //printf("Hello World!\n");
+    
+    pidParm enclosure1 = {
+        .Kp = 200.0f,
+        .Ki = 200.0f,
+        .Kd = 5.0f,
+        .SetPoint = 0.15f,
+    };
     
     uint8_t err;   
     err = adc_init();
@@ -30,17 +41,7 @@ int main(void)
 
     pid_init();
 
-    pidParm enclosure1 = {
-        .Kp = 200.0f,
-        .Ki = 200.0f,
-        .Kd = 5.0f,
-        .SetPoint = 0.15f,
-    };
     
-    float psi = 0.0f;
-    float duty = 0.0f;
-    float l_min = 0.0f;
-    float pidTerm = 0.0f;
 
 
     while (1) {

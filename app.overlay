@@ -11,14 +11,14 @@
             psels = <NRF_PSEL(PWM_OUT0, 1, 1)>;
         };
     };
-    spi1_honeywell_default: spi1_honeywell_default {
+    spi1_sensor_default: spi1_sensor_default {
         group1 {
             psels = <NRF_PSEL(SPIM_SCK, 1, 4)>,
                     <NRF_PSEL(SPIM_MISO, 1, 3)>;
         };
     };
 
-    spi1_honeywell_sleep: spi1_honeywell_sleep {
+    spi1_sensor_sleep: spi1_sensor_sleep {
         group1 {
             psels = <NRF_PSEL(SPIM_SCK, 1, 4)>,
                     <NRF_PSEL(SPIM_MISO, 1, 3)>;
@@ -38,10 +38,10 @@
         compatible = "nordic,nrf-spi";
         status = "okay";
         cs-gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
-        pinctrl-0 = <&spi1_honeywell_default>;
-        pinctrl-1 = <&spi1_honeywell_sleep>;
+        pinctrl-0 = <&spi1_sensor_default>;
+        pinctrl-1 = <&spi1_sensor_sleep>;
         pinctrl-names = "default", "sleep";
-        honeywell_pressure: honeywell_pressure@0 {
+        sensor_pressure: sensor_pressure@0 {
                 compatible = "vnd,spi-device";
                 reg = <0>;
                 spi-max-frequency = <800000>;
