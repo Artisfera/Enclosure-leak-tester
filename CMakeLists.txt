@@ -5,8 +5,8 @@ project(D6F-Read)
 
 target_sources(app PRIVATE
     src/main.c
-    src/adcin.c
-    src/pwmout.c
-    src/spiin.c
+    src/adc.c
+    src/pwm.c
+    src/spi.c
     src/pid.c
 )

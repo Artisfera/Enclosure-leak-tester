@@ -11,14 +11,18 @@ struct spi_dt_spec honeywell_pressure = SPI_DT_SPEC_GET(DT_NODELABEL(honeywell_p
 
 int spi_init(void)
 {
-    if (spi_is_ready_dt(&honeywell_pressure)) {
-        LOG_INF("SPI interface: READY");
+    bool ready;
 
-    } else {
-        LOG_ERR("SPI interface: NOT READY");
-        return -1;
-        
-    }   
+    do {
+        ready = spi_is_ready_dt(&honeywell_pressure);
+
+        if (!ready) {
+            LOG_ERR("SPI interface: NOT READY");
+        }
+
+    } while (!ready);
+
+    LOG_INF("SPI interface: READY");
 
     return 0;
 }
@@ -37,12 +41,15 @@ int spi_read_pressure(float *psi)
         .count = 1
     };
 
-    int err = spi_read_dt(&honeywell_pressure, &rx);
+    int err;
 
-    if (err < 0) {
+    do {
+        err = spi_read_dt(&honeywell_pressure, &rx);
+
+        if (err < 0) {
         LOG_ERR("SPI read failed: %d", err);
-        return err;
-    }
+        }
+    } while (err < 0);
 
     uint8_t status = rx_data[0] >> 6;
 

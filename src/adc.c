@@ -29,29 +29,36 @@ static struct adc_sequence sequence = {
 
 int adc_init(void)
 {
-        int err = adc_channel_setup(adc, &channel_cfg);
+    int err;
+
+    do {
+        err = adc_channel_setup(adc, &channel_cfg);
 
         if (err < 0) {
                 LOG_ERR("ADC channel setup failed: %d", err);
                 return err;
         }
+    } while (err < 0);
 
-        sequence.calibrate = true;
-
+    sequence.calibrate = true;
+    
+    do {
         err = adc_read(adc, &sequence);
-
-        sequence.calibrate = false;
 
         if (err < 0) {
                 LOG_ERR("ADC calibration failed: %d", err);
                 return err;
         }
+    } while (err < 0);
+
+    sequence.calibrate = false;
 
         return 0;
 }
 
 
-int adc_read_flowrate(int *ml_min)
+//int adc_read_flowrate(int *ml_min)
+int adc_read_flowrate(float *l_min)
 {
         int err = adc_read(adc, &sequence);
 
@@ -75,7 +82,15 @@ int adc_read_flowrate(int *ml_min)
         }
 
         //*ml_min = (voltage_mv - 500) / 20;
-        *ml_min = voltage_mv;
+
+        float voltage = voltage_mv / 1000.0f;
+        *l_min = (((((0.094003f * voltage - 0.564312f) * voltage
+                  + 1.374705f) * voltage
+                  - 1.601495f) * voltage
+                  + 1.060657f) * voltage
+                  - 0.269996f)
+                  * 100.0f;
+        
 
         /*if (*ml_min > 100) {
                 LOG_ERR("Flow is too HIGH! - %d ml/min", *ml_min);
