@@ -3,7 +3,10 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(pwm, LOG_LEVEL_DBG);
 
+#include "pwm.h"
+
 static const struct device *pwm0_motor = DEVICE_DT_GET(DT_NODELABEL(pwm0));
+
 
 int pwm_set_percent(float duty)
 {
@@ -22,10 +25,9 @@ int pwm_set_percent(float duty)
 
     if (err < 0) {
         LOG_ERR("PWM set failed: %d", err);
-        return err;
+        return PWM_SET_ERR;
     }
 
-    return 0;
+    return PWM_OK;
 
-    return 0;
 }

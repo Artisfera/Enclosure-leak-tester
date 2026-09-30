@@ -18,17 +18,23 @@ int main(void)
     uint8_t err;   
     err = adc_init();
     if (err != 0){
-        LOG_ERR("ADC faile with code error %d", err);
+        LOG_ERR("ADC failed with code error: %d", err);
         return -1;
-    }
-    spi_init();
+    };
+
+    err = spi_init();
+    if (err != 0){
+        LOG_ERR("SPI failed with code error: %d", err);
+        return -1;
+    };
+
     pid_init();
 
     pidParm enclosure1 = {
-        200.0f,
-        200.0f,
-        5.0f,
-        0.15f
+        .Kp = 200.0f,
+        .Ki = 200.0f,
+        .Kd = 5.0f,
+        .SetPoint = 0.15f,
     };
     
     float psi = 0.0f;
@@ -54,7 +60,8 @@ int main(void)
             (double)pidTerm,
             (double)duty,
             (double)l_min);
-
+        
+        
         k_msleep(50);
 }
 

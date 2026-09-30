@@ -4,28 +4,27 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(spi, LOG_LEVEL_DBG);
 
-#define SPIOP SPI_WORD_SET(8) | SPI_TRANSFER_MSB
-struct spi_dt_spec honeywell_pressure = SPI_DT_SPEC_GET(DT_NODELABEL(honeywell_pressure), SPIOP);
+#include "spi.h"
 
+#define SPIOP SPI_WORD_SET(8) | SPI_TRANSFER_MSB
+struct spi_dt_spec sensor_pressure = SPI_DT_SPEC_GET(DT_NODELABEL(sensor_pressure), SPIOP);
 
 
 int spi_init(void)
 {
     bool ready;
 
-    do {
-        ready = spi_is_ready_dt(&honeywell_pressure);
+    ready = spi_is_ready_dt(&sensor_pressure);
 
-        if (!ready) {
-            LOG_ERR("SPI interface: NOT READY");
-            k_msleep(100);
-        }
+    if (!ready) {
+        LOG_ERR("SPI interface: NOT READY");
+        return SPI_INTERFACE_ERR;
+    }
 
-    } while (!ready);
 
     LOG_INF("SPI interface: READY");
 
-    return 0;
+        return SPI_OK;
 }
 
 int spi_read_pressure(float *psi)
@@ -44,14 +43,12 @@ int spi_read_pressure(float *psi)
 
     int err;
 
-    do {
-        err = spi_read_dt(&honeywell_pressure, &rx);
+        err = spi_read_dt(&sensor_pressure, &rx);
 
         if (err < 0) {
         LOG_ERR("SPI read failed: %d", err);
-        k_msleep(10);
+        return SPI_READ_ERR;
         }
-    } while (err < 0);
 
     uint8_t status = rx_data[0] >> 6;
 
@@ -59,8 +56,8 @@ int spi_read_pressure(float *psi)
     LOG_DBG("SPI read status: %d", status);
 
     if (status != 0) {
-        LOG_ERR("Honeywell status error: %d", status);
-        k_msleep(10);
+        LOG_ERR("Sensor status error: %d", status);
+        return SENSOR_STATUS_ERR;
     }
 
     int output = (rx_data[0] & 0x3F) * 256 + rx_data[1];
@@ -68,5 +65,5 @@ int spi_read_pressure(float *psi)
 
     LOG_DBG("Pressure: %.3f psi", (double)*psi);
 
-    return 0;
+    return SPI_OK;
 }
