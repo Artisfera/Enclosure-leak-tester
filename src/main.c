@@ -14,26 +14,38 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 int main(void)
 {
     //printf("Hello World!\n");
-        
-    adc_init();
+    
+    uint8_t err;   
+    err = adc_init();
+    if (err != 0){
+        LOG_ERR("ADC faile with code error %d", err);
+        return -1;
+    }
     spi_init();
     pid_init();
 
+    pidParm enclosure1 = {
+        200.0f,
+        200.0f,
+        5.0f,
+        0.15f
+    };
+    
     float psi = 0.0f;
     float duty = 0.0f;
     float l_min = 0.0f;
     float pidTerm = 0.0f;
-        
+
 
     while (1) {
         adc_read_flowrate(&l_min);
 
         spi_read_pressure(&psi);
 
-        pid_calc(psi, &pidTerm);
+        pid_calc(psi, &pidTerm, enclosure1);
 
         duty = pidTerm;
-        duty = CLAMP(duty, 0.0f, 50.0f);
+        //duty = CLAMP(duty, 0.0f, 50.0f);
 
         pwm_set_percent(duty);
 

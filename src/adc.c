@@ -31,15 +31,13 @@ int adc_init(void)
 {
     int err;
 
-    do {
-        err = adc_channel_setup(adc, &channel_cfg);
+    err = adc_channel_setup(adc, &channel_cfg);
 
-        if (err < 0) {
-                LOG_ERR("ADC channel setup failed: %d", err);
-                return err;
-        }
-    } while (err < 0);
-
+    if (err <= 0) {
+            LOG_ERR("ADC channel setup failed: %d", err);
+            return ADC_CHANNEL_SETUP_ERROR;
+    }
+\
     sequence.calibrate = true;
     
     do {
@@ -47,25 +45,29 @@ int adc_init(void)
 
         if (err < 0) {
                 LOG_ERR("ADC calibration failed: %d", err);
-                return err;
+                k_msleep(100);
         }
     } while (err < 0);
 
     sequence.calibrate = false;
 
-        return 0;
+        return ADC_OK;
 }
 
 
 //int adc_read_flowrate(int *ml_min)
 int adc_read_flowrate(float *l_min)
 {
-        int err = adc_read(adc, &sequence);
+    int err;
+
+    do {
+        err = adc_read(adc, &sequence);
 
         if (err < 0) {
-                LOG_ERR("ADC read failed: %d", err);
-                return err;
+            LOG_ERR("ADC read failed: %d", err);
+            k_msleep(100);
         }
+    } while (err < 0);
 
         int32_t voltage_mv = sample;
 

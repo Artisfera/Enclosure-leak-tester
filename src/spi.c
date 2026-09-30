@@ -18,6 +18,7 @@ int spi_init(void)
 
         if (!ready) {
             LOG_ERR("SPI interface: NOT READY");
+            k_msleep(100);
         }
 
     } while (!ready);
@@ -48,6 +49,7 @@ int spi_read_pressure(float *psi)
 
         if (err < 0) {
         LOG_ERR("SPI read failed: %d", err);
+        k_msleep(10);
         }
     } while (err < 0);
 
@@ -58,7 +60,7 @@ int spi_read_pressure(float *psi)
 
     if (status != 0) {
         LOG_ERR("Honeywell status error: %d", status);
-        return -1;
+        k_msleep(10);
     }
 
     int output = (rx_data[0] & 0x3F) * 256 + rx_data[1];
