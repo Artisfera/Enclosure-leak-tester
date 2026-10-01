@@ -158,3 +158,45 @@ I sent the parts to the printer for the weekend, so the next useful test will be
 I also added a 45 degree transition inside the female side of the connector. This lets the part print without internal supports. I wanted to avoid support marks inside the airflow path because they could change the surface and make the flow less repeatable.
 
 **Total time spent: 8 hours**
+
+# September 28: Finishing the D6F-P bypass adapter
+
+Today I finished the next version of the D6F-P bypass adapter.
+
+I prepared variants for the different D6F-P configurations I was considering and kept two restriction sizes, 11.61 mm and 12.97 mm, so I could test different airflow ranges without redesigning the whole part.
+
+I also cleaned up the mechanical side of the repository and added the FreeCAD models, printable files, datasheets and an updated diagram of the tester.
+
+The adapter is now ready for physical testing. The calculated restriction is still only a starting point, so the finished bypass will need to be calibrated with the real printed parts.
+
+**Total time spent: 5 hours**
+
+# September 29: Reworking the firmware
+
+Today I started cleaning up the firmware and moving away from the earlier prototype code.
+
+I changed the D6F-P conversion to use the polynomial approximation from the Omron documentation and switched the airflow value from an integer to a float.
+
+I also moved the PID calculations out of `main.c` into a separate module. The main loop is now much simpler and mostly handles the measurement sequence: read airflow, read pressure, calculate PID output and update the turbine PWM.
+
+I started going through the ADC and SPI error handling as well, because the earlier code mostly assumed that every read would work correctly.
+
+**Total time spent: 6 hours**
+
+# September 30: Firmware 1.0.0
+
+Today I finished the first version of the firmware that I consider complete enough to use for the actual tester.
+
+The code went through versions 0.3.0, 0.3.1 and 0.3.2 before reaching 1.0.0.
+
+I cleaned up the ADC, SPI, PWM and PID modules and added proper status values for hardware errors. The initialization code now checks whether the ADC and SPI are actually ready instead of continuing blindly after a failure.
+
+I also changed the PID configuration so Kp, Ki, Kd and the setpoint are stored together in a structure. This makes it possible to use different PID settings for different enclosures without changing the PID algorithm itself.
+
+I added protection against a zero time interval in the PID calculation and made a few smaller changes to the PWM and pressure sensor code.
+
+At the same time I corrected the D6F-P adapter after checking the first printed version. Some of the dimensions were slightly off, so I adjusted the model before continuing with the pneumatic tests.
+
+This became firmware version 1.0.0.
+
+**Total time spent: 7 hours**
