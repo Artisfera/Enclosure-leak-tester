@@ -35,7 +35,7 @@ int adc_init(void)
 
     err = adc_channel_setup(adc, &channel_cfg);
 
-    if (err <= 0) {
+    if (err < 0) {
             LOG_ERR("ADC channel setup failed: %d", err);
             return ADC_CH_SETUP_ERR;
     }

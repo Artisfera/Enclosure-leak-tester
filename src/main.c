@@ -13,17 +13,17 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 int main(void)
 {
-    float psi = 0.0f;
+    float pressure_pa = 0.0f;
     float duty = 0.0f;
     float l_min = 0.0f;
     float pidTerm = 0.0f;
     //printf("Hello World!\n");
     
     pidParm enclosure1 = {
-        .Kp = 200.0f,
-        .Ki = 200.0f,
-        .Kd = 5.0f,
-        .SetPoint = 0.15f,
+        .Kp = 0.5f,
+        .Ki = 0.01f,
+        .Kd = 1.0f,
+        .SetPoint = 50.0f,
     };
     
     uint8_t err;   
@@ -47,23 +47,21 @@ int main(void)
     while (1) {
         adc_read_flowrate(&l_min);
 
-        spi_read_pressure(&psi);
+        spi_read_pressure(&pressure_pa);
+        printf(">Pressure:%.4f,", (double)pressure_pa);
+        pid_calc(pressure_pa, &pidTerm, enclosure1);
 
-        pid_calc(psi, &pidTerm, enclosure1);
-
-        duty = pidTerm;
-        //duty = CLAMP(duty, 0.0f, 50.0f);
+        duty = 5.0f + pidTerm;
+        duty = CLAMP(duty, 0.0f, 20.0f);
 
         pwm_set_percent(duty);
 
-        printf(">Pressure:%.4f,pidTerm:%.4f,duty:%.4f,l_min:%.4f\r\n",
-            (double)psi,
-            (double)pidTerm,
-            (double)duty,
-            (double)l_min);
-        
-        
-        k_msleep(50);
+        // printf(">Pressure:%.4f,pidTerm:%.4f,duty:%.4f,l_min:%.4f\r\n",
+        //     (double)pressure_pa,
+        //     (double)pidTerm,
+        //     (double)duty,
+        //     (double)l_min);
+   // k_msleep(100);
 }
 
     return 0;

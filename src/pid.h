@@ -11,6 +11,6 @@ typedef struct {
 extern pidParm enclosure1;
 
 int pid_init(void);
-int pid_calc(float psi, float *pidTerm, pidParm pidparm);
+int pid_calc(float pressure_pa, float *pidTerm, pidParm pidparm);
 
 #endif

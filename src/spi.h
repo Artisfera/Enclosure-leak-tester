@@ -9,7 +9,7 @@ typedef enum {
 } spi_status;
 
 int spi_init(void);
-int spi_read_pressure(float *psi);
+int spi_read_pressure(float *pressure_pa);
 
 
 #endif

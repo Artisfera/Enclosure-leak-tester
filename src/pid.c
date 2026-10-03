@@ -1,4 +1,5 @@
 #include <zephyr/kernel.h>
+#include <zephyr/sys/util.h>
 
 #include "pid.h"
 
@@ -15,10 +16,9 @@ int pid_init(void)
 }
 
 
-int pid_calc(float psi, float *pidTerm, pidParm pidparm)
+int pid_calc(float pressure_pa, float *pidTerm, pidParm pidparm)
 {
-    float error = pidparm.SetPoint - psi;
-
+    float error = pidparm.SetPoint - pressure_pa;
 
     float pTerm = pidparm.Kp * error;
 
@@ -32,6 +32,9 @@ int pid_calc(float psi, float *pidTerm, pidParm pidparm)
     }
 
     integral += error * dt;
+
+    //integral = CLAMP(integral, -0.25f, 0.25f);
+
     float iTerm = pidparm.Ki * integral;
 
     derivative = (error - previousError) / dt;
@@ -40,6 +43,13 @@ int pid_calc(float psi, float *pidTerm, pidParm pidparm)
     previousError = error;
 
     *pidTerm = pTerm + iTerm + dTerm;
+
+    printf("pTerm:%.4f,iTerm:%.4f,dTerm:%.4f,SetPoint:%.4f,pidTerm:%.4f\r\n",
+        pTerm,
+        iTerm,
+        dTerm,
+        pidparm.SetPoint,
+        pidTerm);
 
     return 0;
 }

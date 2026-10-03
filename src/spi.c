@@ -27,7 +27,7 @@ int spi_init(void)
         return SPI_OK;
 }
 
-int spi_read_pressure(float *psi)
+int spi_read_pressure(float *pressure_pa)
 {
     uint8_t rx_data[2] = {0};
 
@@ -55,15 +55,17 @@ int spi_read_pressure(float *psi)
     LOG_DBG("SPI read data: %02X %02X", rx_data[0], rx_data[1]);
     LOG_DBG("SPI read status: %d", status);
 
-    if (status != 0) {
-        LOG_ERR("Sensor status error: %d", status);
-        return SENSOR_STATUS_ERR;
-    }
+    // if (status != 0) {
+    //     LOG_ERR("Sensor status error: %d", status);
+    //     return SENSOR_STATUS_ERR;
+    // }
 
     int output = (rx_data[0] & 0x3F) * 256 + rx_data[1];
-    *psi = ((output - 1638.0f) * 2.0f) / 13108.0f - 1.0f;
 
-    LOG_DBG("Pressure: %.3f psi", (double)*psi);
+    *pressure_pa = -498.18f + ((output - 1638.0f) * (996.36f / 13108.0f));
+
+    LOG_DBG("Pressure: %.2f Pa", (double)*pressure_pa);
 
     return SPI_OK;
 }
+
