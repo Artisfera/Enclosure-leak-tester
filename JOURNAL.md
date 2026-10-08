@@ -159,44 +159,84 @@ I also added a 45 degree transition inside the female side of the connector. Thi
 
 **Total time spent: 8 hours**
 
-# September 28: Finishing the D6F-P bypass adapter
+# September 28 - Final adapter version and first enclosure work
 
-Today I finished the next version of the D6F-P bypass adapter.
+Today I finished another, nearly final version of the D6F-P bypass adapter.
 
-I prepared variants for the different D6F-P configurations I was considering and kept two restriction sizes, 11.61 mm and 12.97 mm, so I could test different airflow ranges without redesigning the whole part.
+I kept the possibility of testing different restriction diameters and prepared the variants needed for further experiments. The adapter itself was already developed enough that I could stop focusing on its basic geometry and move on to another part of the test setup.
 
-I also cleaned up the mechanical side of the repository and added the FreeCAD models, printable files, datasheets and an updated diagram of the tester.
+I started designing the lid that will create a sealed connection between the tester and the enclosure being tested. It was a much larger part than the previous components and it quickly became clear that it required a different approach to modelling.
 
-The adapter is now ready for physical testing. The calculated restriction is still only a starting point, so the finished bypass will need to be calibrated with the real printed parts.
+This part also helped me make a lot of progress in FreeCAD. Instead of treating sketches only as a way to draw a specific shape, I started using constraints and dimensional relationships much more deliberately. The model started becoming something that could be modified later without rebuilding everything from scratch.
 
-**Total time spent: 5 hours**
+I also cleaned up the mechanical side of the repository and added the models, printable files, documentation and an updated diagram of the tester.
 
-# September 29: Reworking the firmware
+**Total time spent 5 hours**
 
-Today I started cleaning up the firmware and moving away from the earlier prototype code.
+# September 29 - Cleaning up the firmware
 
-I changed the D6F-P conversion to use the polynomial approximation from the Omron documentation and switched the airflow value from an integer to a float.
+After several days of adding new functions, the code still contained many parts that had been created while I was learning the nRF52840, Zephyr and C. Today I started turning the earlier prototype into more organised firmware.
 
-I also moved the PID calculations out of `main.c` into a separate module. The main loop is now much simpler and mostly handles the measurement sequence: read airflow, read pressure, calculate PID output and update the turbine PWM.
+I removed unnecessary fragments and leftovers from earlier tests. I changed the D6F-P flow conversion to use the polynomial approximation from the Omron documentation and changed the airflow value to a `float`.
 
-I started going through the ADC and SPI error handling as well, because the earlier code mostly assumed that every read would work correctly.
+I also moved the PID controller out of `main.c` into a separate module. This made the main loop much simpler and left it mostly responsible for the sequence of operations, including reading airflow, reading pressure, calculating the PID output and updating the PWM.
 
-**Total time spent: 6 hours**
+I also started improving the ADC and SPI error handling. Earlier versions of the code mostly assumed that every read would succeed, which was acceptable during the first tests but not for a more complete device.
 
-# September 30: Firmware 1.0.0
+**Total time spent 6 hours**
 
-Today I finished the first version of the firmware that I consider complete enough to use for the actual tester.
+# September 30 - Firmware 1.0.0 and the airflow calibration problem
 
-The code went through versions 0.3.0, 0.3.1 and 0.3.2 before reaching 1.0.0.
+Today I finished a larger cleanup of the firmware. The code went through several versions before reaching `1.0.0`.
 
-I cleaned up the ADC, SPI, PWM and PID modules and added proper status values for hardware errors. The initialization code now checks whether the ADC and SPI are actually ready instead of continuing blindly after a failure.
+I cleaned up the ADC, SPI, PWM and PID modules, added separate error status values and improved hardware initialisation. I also moved the PID parameters into one structure so that different settings can later be used without changing the controller algorithm itself.
 
-I also changed the PID configuration so Kp, Ki, Kd and the setpoint are stored together in a structure. This makes it possible to use different PID settings for different enclosures without changing the PID algorithm itself.
+After bringing the firmware to this stage, a larger measurement problem still remained. The D6F-P measures only a small part of the airflow in the bypass, so the printed adapter and calculated restriction alone are not enough. I still need to determine the real relationship between the airflow through the D6F-P and the total airflow through the tester.
 
-I added protection against a zero time interval in the PID calculation and made a few smaller changes to the PWM and pressure sensor code.
+I started with a whiteboard brainstorming session and tried to develop a calibration method from first principles.
 
-At the same time I corrected the D6F-P adapter after checking the first printed version. Some of the dimensions were slightly off, so I adjusted the model before continuing with the pneumatic tests.
+The first obvious ideas were a Pitot tube and a Venturi, but I rejected them fairly quickly. In a home-built setup there are too many additional variables related to geometry, flow profile and manufacturing accuracy for either method to be a reliable reference.
 
-This became firmware version 1.0.0.
+The next idea was a balloon with a known volume. The problem is that its walls stretch during inflation and create their own pressure, so the measurement conditions change as the balloon fills.
 
-**Total time spent: 7 hours**
+A large syringe seemed like a better direction. The problem there is the piston seal and static friction. At low pressure differences the piston does not move perfectly smoothly, so it is also not a good reference.
+
+By the end of the day I had a much clearer idea of what the calibrator needed to do. It has to measure a known volume of air over a known time while adding as little and as predictable resistance to the airflow as possible.
+
+**Total time spent 7 hours**
+
+# October 1 - Parametric lid and bell prover
+
+The first lid tests revealed another mechanical problem. The large flat surface was too flexible, which made it difficult to maintain even and sealed contact with the gasket.
+
+I redesigned the lid into a cone-like shape. The geometry itself significantly increased its stiffness without requiring the entire part to become very thick.
+
+I also wanted to be able to test different wall thicknesses easily. This forced me to define the constraints in FreeCAD more carefully. Critical geometry such as the gasket interface and the 22 mm connector can remain unchanged while the wall thickness is treated as a parameter that can be adjusted independently.
+
+This was the point where I really understood the advantage of parametric modelling. Instead of correcting several dependent dimensions after every change, I can now change one value while keeping the important design assumptions intact. After solving this, FreeCAD started to feel more suitable for this kind of work than Fusion 360.
+
+I also returned to the airflow calibration problem. I reversed the syringe idea. Instead of moving a sealed piston inside a cylinder, the whole container can move while water is used only as the seal.
+
+In practice, this means using an inverted container of known volume partially submerged in water. Incoming air raises the container, and the airflow can be calculated from the displaced gas volume and the elapsed time. A larger container allows the same principle to be used for much higher flow rates.
+
+I also added the idea of a counterweight that can nearly balance the moving container and reduce the additional pressure required to lift it.
+
+Only later did I find out that this was not a new invention. A very similar method already exists in gas flow metrology and is known as a **bell prover**, a volumetric displacement standard used for calibrating gas flow.
+
+**Total time spent 8 hours**
+
+# October 2 - First complete electronics and PID tests
+
+Today I started assembling the electronics in a form much closer to the actual tester and testing the whole system as one closed control loop.
+
+On paper, all of the individual parts were already working. Pressure measurement over SPI, airflow measurement, PWM control and the PID controller had all been tested separately. Once they were combined in the real setup, several problems appeared that were not visible during individual module testing.
+
+I fixed several issues related to initialisation and PWM control. The PID also behaved differently than it did during the earlier, more controlled tests. When the PWM output reached its maximum limit, the integral term could continue growing even though the system could no longer increase the control output. The physical setup also made it clear how important the correct controller direction is.
+
+The most important change was the pressure sensor. The Honeywell ABP I had been using had a range that was much too large compared with the target pressure of around 50 Pa. I replaced it with a more suitable Honeywell HSC `002ND` differential pressure sensor with a much smaller measurement range.
+
+Communication still uses SPI and the same basic Honeywell digital pressure format, but the physical pressure range represented by the output values is different. I therefore also started moving the pressure calculations from psi to pascals, which makes much more sense at such low pressures.
+
+The electronics and the required components are now assembled together. The next step is to adapt the controller to the real setup. The earlier PID settings looked reasonable during simpler tests, but the complete system now needs a more systematic way of choosing the parameters instead of relying only on trial and error.
+
+**Total time spent 8 hours**
