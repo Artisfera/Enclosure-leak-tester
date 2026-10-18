@@ -1,99 +1,124 @@
 # Enclosure Leak Tester
 
-An enclosure leak tester that measures the amount of airflow required to maintain a constant pressure inside the tested enclosure.
+An enclosure leak tester that measures the airflow required to maintain a constant pressure inside a tested enclosure.
 
-I am developing this project independently as part of an unpaid technical internship at a large company. It was created in response to a real engineering problem I encountered during the internship. Because the intended application is internal, I do not publish the company name or any details that could identify the specific use case.
+I developed this project independently during an unpaid technical internship at a large company. It started with a real engineering problem encountered during the internship. Since the intended application is internal, I do not publish the company name or identifying details of that use case.
 
-The tester architecture, firmware, and mechanical design presented here are all developed by me.
+The tester architecture, firmware and custom mechanical design presented here were developed by me.
 
-<img src="./pictures/camera/final-leak-test-setup.jpg" alt="Final leak-test setup with a Panasonic flow meter" width="440" />
+![Final leak-test setup with a Panasonic flow meter](pictures/camera/final-leak-test-setup.jpg)
 
-*Final test setup for measuring enclosure leakage.*
+*Final test setup used for measuring enclosure leakage.*
 
 ## How does it work?
 
-A turbine pushes air into the tested enclosure, while a PID controller adjusts its output to maintain the target pressure.
+A turbine pushes air into the tested enclosure, and a PID controller changes its PWM output to maintain a chosen pressure. A Honeywell differential pressure sensor provides the feedback signal over SPI.
 
-Pressure is measured using a Honeywell sensor connected over SPI. Airflow is measured using an Omron D6F-P connected to the ADC.
+The intended flow measurement uses an Omron D6F-P in a separate bypass. Most of the air travels through the main channel and its restriction; only a small fraction passes through the D6F-P. A calibration would be needed to convert the bypass reading into total airflow.
 
-Because the measurement range of the D6F-P is much lower than the total airflow of the system, the sensor operates in a separate bypass. Most of the air flows through the main channel and its restriction, while only a small portion passes through the D6F-P.
+**What was actually demonstrated:** the final enclosure measurements were made with a separate Panasonic FM-215-8 industrial airflow meter, using the reading on its display, while maintaining an overpressure of 50 Pa. The D6F-P bypass and ADC conversion path were not successfully calibrated by the end of the internship. The journal documents the unsuccessful calibration attempts and the ADC processing problem. The two enclosure readings were 16.8 and 24.6 L/min at 50 Pa, with a separate lid-seal check reading 0 L/min on the reference instrument's display. These are test observations, not a validated accuracy specification for the home-built flow sensor.
 
-The final goal is to determine the enclosure leak rate from the airflow required to maintain a constant pressure.
+![Enclosure leak tester diagram version 1.0.0](diagram/Enclosure-Leak-Sensor_1.0.0.svg)
 
-<img src="./diagram/Enclosure-Leak-Sensor_1.0.0.svg" alt="Enclosure leak tester diagram, version 1.0.0" width="680" />
-
-*Diagram of the tester’s pneumatic and electronic systems.*
+*Conceptual diagram of the tester's pneumatic and electronic systems.*
 
 ## Main components
 
-- Nordic nRF52840
-- Zephyr / nRF Connect SDK
-- Omron D6F-P
-- Honeywell pressure sensor
-- turbine control using PWM
-- custom PID controller
-- 3D-printed pneumatic parts designed in FreeCAD
-- 22 mm conical connectors
-- D6F-P bypass with a restriction in the main airflow path
+- Nordic nRF52840 DK / PCA10056 development board, running Zephyr / nRF Connect SDK
+- Omron D6F-P0001A1 airflow sensor for the original bypass measurement path
+- Honeywell HSC 002ND series differential pressure sensor (replacing an earlier ABP sensor)
+- PWM-controlled turbine / blower
+- 3D-printed pneumatic adapters and gasketed measuring lid designed in FreeCAD
+- 22 mm conical pneumatic interfaces
+- Panasonic FM-215-8, used as an external measurement instrument in the final test setup
 
-<img src="./pictures/camera/integrated-turbine-electronics.jpg" alt="Integrated turbine electronics and sensor connections" width="580" />
+![Integrated turbine electronics and sensor connections](pictures/camera/integrated-turbine-electronics.jpg)
 
-*The turbine and electronics integrated into a single test setup.*
+*The turbine and electronics during integration.*
 
 ## Mechanical design
 
-The pneumatic parts and lid are designed in FreeCAD. The lid uses a gasket to seal against the enclosure, while the adapters use 22 mm conical connections.
+The pneumatic adapters and measuring lid were designed in FreeCAD. The lid uses a gasket to seal against the tested enclosure, and the adapters use 22 mm conical connections. Source models are under [`3d-models/`](3d-models/).
 
-<img src="./pictures/camera/lid-gasket-closeup.jpg" alt="Close-up of the lid and gasket interface" width="400" />
+![Close-up of the lid and gasket interface](pictures/camera/lid-gasket-closeup.jpg)
 
-*Lid and gasket sealing surface during testing on September 29.*
+*Lid and gasket sealing surface during September 29 tests.*
 
-## Firmware
+## Electronics and firmware
 
-The firmware is split into separate modules:
+The Zephyr application is in [`code/release/`](code/release/). Its source modules are `adc`, `spi`, `pid`, `pwm` and `main`.
 
-- `adc` - airflow measurement
-- `spi` - pressure measurement
-- `pid` - pressure controller
-- `pwm` - turbine control
-- `main` - main device logic
+The release device-tree overlay uses the following nRF52840 signals:
 
-The first complete firmware version was released as `1.0.0`.
+| Signal | Pin / connection in the firmware | Purpose |
+| --- | --- | --- |
+| ADC input | `NRF_SAADC_AIN7` | Original D6F-P analog signal |
+| SPI SCK | `P1.04` | Honeywell pressure sensor clock |
+| SPI MISO | `P1.03` | Honeywell pressure sensor data |
+| SPI CS | `P1.02` | Honeywell pressure sensor select |
+| PWM | `P1.01` | Turbine control signal |
+| SW0 | `sw0` devicetree alias | Measurement button |
 
-The PID controller adjusts turbine PWM to maintain the pressure setpoint. Early tuning runs are documented in the journal.
+These are firmware configuration references, not a complete power wiring schematic. Voltage levels, turbine driver requirements and the exact wiring should be verified against the physical components before rebuilding the device. The system diagram and parts reference documents are in [`diagram/`](diagram/) and [`docs/`](docs/).
 
-<img src="./pictures/chart/pid-step-response.png" alt="PID controller step response during tuning" width="680" />
+To work with the firmware, open `code/release/` as a Zephyr / nRF Connect SDK application, select the nRF52840 DK board supported by your installed SDK, and build/flash it using the standard Zephyr workflow. The software is a documented development snapshot, not a validated, calibrated product release.
+
+![PID step response during tuning](pictures/chart/pid-step-response.png)
 
 *Recorded PID controller response from September 22.*
 
 ## Airflow calibration
 
-The D6F-P bypass needs calibration to relate the measured bypass flow to total airflow. A bell prover was explored using a moving inverted bottle sealed by water, with volume and elapsed time as the basis for the method.
+The D6F-P bypass still needs calibration to relate its measured bypass airflow to total airflow. I explored a bell prover using an inverted bottle in a water seal, with displaced volume and elapsed time as the basis of the method.
 
-<img src="./pictures/camera/bell-prover-counterweight-sketch.jpg" alt="Sketch of the bell prover concept with a counterweight" width="580" />
+![Bell prover concept with a counterweight](pictures/camera/bell-prover-counterweight-sketch.jpg)
 
-*Bell prover concept with a counterweight to reduce resistance to movement.*
+*Bell prover concept and counterweight idea.*
 
-The prototype used bottles, tubing and a drainage pipe. The bottle was counterbalanced by hand; the recorded results were too inconsistent for reliable calibration. The journal also documents the ADC conversion error discovered later.
+The prototype used bottles, tubing and a drainage pipe. Manually counterbalancing the bottle led to results that were too inconsistent for a useful reference. During the last day of the internship I also identified an incorrect ADC conversion. This means the earlier flow readings cannot be treated as calibrated readings.
 
-<img src="./pictures/camera/bottle-calibration-tubing.jpg" alt="Bottle and tubing in the prototype calibration setup" width="400" />
+![Bottle and tubing in the calibration prototype](pictures/camera/bottle-calibration-tubing.jpg)
 
-*The prototype setup used to test the bell prover calibration method.*
+*Prototype calibration setup.*
+
+## Bill of Materials (BOM)
+
+The detailed, itemised parts list is in **[`BOM.csv`](BOM.csv)**. It distinguishes core parts from development and external test equipment. The list is based on the published journal, code, CAD files and photographs.
+
+| Part | Quantity documented | Role / source |
+| --- | --- | --- |
+| Nordic nRF52840 DK (PCA10056) | 1 | [Board documentation](docs/PCA10056-nRF52840%20Development%20Board%203_0_3/Schematic_Layout%20pdf%20files/PCA10056_Schematic_And_PCB.pdf) |
+| Omron D6F-P0001A1 | 1 | [Sensor documentation](docs/D6F-P/D6F-P.pdf) |
+| Honeywell HSC 002ND differential sensor | 1 | [HSC reference document](docs/HSCDRRD002NDSA3/3946815.pdf) |
+| PWM-driven turbine / blower | 1 | [Integration photo](pictures/camera/integrated-turbine-electronics.jpg); exact model to confirm |
+| 3D-printed D6F bypass adapter | 1 design | [Editable model](3d-models/D6F-Resistance/D6F-Resistance-0.3.0-%2820-11.61%29.FCStd) |
+| 3D-printed lid with sealing gasket | 1 design | [Editable model](3d-models/measuring-lid-gasket/measuring-lid-gasket_1.0.0.FCStd) |
+| Gasket, tubing, connectors and wiring | Quantities to confirm | See `BOM.csv` for references and missing specifications |
+| Panasonic FM-215-8 | 1, external test instrument | [Meter documentation](docs/FM-215-8/FM-200-SERIES-INS-EN.pdf); not a required built-in D6F component |
+
+**Cost status:** original purchase prices and several material quantities are not documented in the repository. Consequently, the total cost is **not verified**, and blank cost fields in the CSV are not zero-cost claims. These values must be checked before treating the BOM as a complete purchasing list.
+
+## Known limitations
+
+- The D6F-P bypass has not been reliably calibrated for total airflow.
+- The analog ADC conversion path is incomplete in the published firmware; do not interpret its output as calibrated L/min.
+- Some part numbers, supply ratings and wiring details need verification from the physical assembly.
+- Final measurements used an external Panasonic instrument. They do not validate the D6F-P measurement path.
 
 ## Journal
 
-I document the full development process in [`JOURNAL.md`](JOURNAL.md).
-
-It contains the successive stages of the project, problems encountered along the way, mechanical design changes, and firmware development starting from the first nRF52840 bring-up.
+I recorded the development process in **[`JOURNAL.md`](JOURNAL.md)**, including the design decisions, unsuccessful experiments, source code history, mechanical work and final tests. The journal has 18 entries and logs 120 hours. Images use relative Markdown links so they work in the cloned repository and can be rewritten by Forge's Git journal synchronisation.
 
 ## Repository
 
-- `code/release/src/` - firmware
-- `3d-models/` - CAD models and printable files
-- `diagram/` - system diagrams
-- `docs/` - documentation for the components and standards used
-- `JOURNAL.md` - project development journal
+- [`code/release/`](code/release/) contains the final development-stage firmware snapshot
+- [`code/stability-test/`](code/stability-test/) and [`code/ai-relay-autotune-test/`](code/ai-relay-autotune-test/) contain test or experimental branches of the work
+- [`3d-models/`](3d-models/) contains editable CAD models and printable parts
+- [`diagram/`](diagram/) contains system diagrams
+- [`docs/`](docs/) contains component documentation and reference material
+- [`JOURNAL.md`](JOURNAL.md) documents the development timeline
+- [`BOM.csv`](BOM.csv) is the parts inventory for rebuilding and reviewing the project
 
 ## License
 
-AGPL-3.0
+AGPL-3.0. See [`LICENSE`](LICENSE).

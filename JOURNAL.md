@@ -14,9 +14,7 @@ I wrote a few simple test programs, including basic GPIO control and a blink tes
 
 By the end of the day I had the development environment working properly and a basic code structure ready for the actual tester instead of just standalone examples.
 
-<p align="center">
-  <img src="pictures/camera/zephyr-nrf52840-from-video.jpg" alt="nRF52840 bring-up shown in the first Zephyr board-test video" width="360">
-</p>
+![nRF52840 bring-up shown in the first Zephyr board-test video](pictures/camera/zephyr-nrf52840-from-video.jpg)
 
 *Authentic frame extracted at approximately 00:06 from the September 15 board-test video; extracted for this documentation update.*
 
@@ -37,9 +35,7 @@ Later I moved on to turbine control. I first tested PWM on a simple load and onl
 
 By the end of the day I had both parts working together. The firmware could measure airflow and control the device generating it.
 
-<p align="center">
-  <img src="pictures/camera/nrf52840-bench-power-supply.jpg" alt="nRF52840 connected on the bench beside the power supply" width="360">
-</p>
+![nRF52840 connected on the bench beside the power supply](pictures/camera/nrf52840-bench-power-supply.jpg)
 
 *nRF52840 connected on the bench beside the power supply.*
 
@@ -56,11 +52,9 @@ The communication itself looked simple at first, but getting it configured corre
 
 The first bytes coming from the sensor were not a ready pressure value either. The sensor includes status information together with the measurement, so I had to separate those bits first and then convert the remaining data into a physical pressure value.
 
-<p align="center">
-  <img src="pictures/technical/pressure-sensor-spi-code.png" alt="Historical Honeywell SPI code showing the read call, status extraction and pressure conversion" width="680">
-</p>
+![Historical Honeywell SPI code showing the read call, status extraction and pressure conversion](pictures/technical/pressure-sensor-spi-code.png)
 
-*Code image rendered for this update from [`src/spiin.c`, lines 28–56, commit `95a6e4e`](https://github.com/Artisfera/Enclosure-leak-tester/blob/95a6e4e/src/spiin.c#L28) (September 17). This preserves the historical implementation, including its original conversion; it is not a screenshot captured that day.*
+*Code image rendered for this update from [`src/spiin.c`, lines 28-56, commit `95a6e4e`](https://github.com/Artisfera/Enclosure-leak-tester/blob/95a6e4e/src/spiin.c#L28) (September 17). This preserves the historical implementation, including its original conversion; it is not a screenshot captured that day.*
 
 I also moved the pressure sensor code into its own source file. At this point the project already included ADC, PWM and SPI, so keeping everything inside one `main.c` file would have become messy very quickly.
 
@@ -78,11 +72,9 @@ The program can start the turbine and monitor the pressure rise inside the enclo
 
 It is still an early version of the measurement method, but this was the first time the whole sequence could run automatically from start to finish.
 
-<p align="center">
-  <img src="pictures/technical/first-measurement-sequence.png" alt="Historical main loop combining pressure and airflow readings with turbine PWM control" width="680">
-</p>
+![Historical main loop combining pressure and airflow readings with turbine PWM control](pictures/technical/first-measurement-sequence.png)
 
-*Code image rendered for this update from [`src/main.c`, lines 13–51, commit `7ed8001`](https://github.com/Artisfera/Enclosure-leak-tester/blob/7ed8001/src/main.c#L13) (September 18), the first integrated version found in Git. Original code is preserved, including the timer placement; this is not a screenshot captured that day.*
+*Code image rendered for this update from [`src/main.c`, lines 13-51, commit `7ed8001`](https://github.com/Artisfera/Enclosure-leak-tester/blob/7ed8001/src/main.c#L13) (September 18), the first integrated version found in Git. Original code is preserved, including the timer placement; this is not a screenshot captured that day.*
 
 The test also showed a weakness in the original control approach. A fixed PWM value does not give the same airflow under every condition. The turbine operating point changes together with pressure and the resistance of the pneumatic system.
 
@@ -104,9 +96,7 @@ For the first tests I limited the maximum turbine output as well. With badly cho
 
 By the end of the day the closed loop was working and the measured value directly affected the next PWM setting.
 
-<p align="center">
-  <img src="pictures/chart/early-pid-oscillations.png" alt="Early PID response showing oscillations during controller development" width="680">
-</p>
+![Early PID response showing oscillations during controller development](pictures/chart/early-pid-oscillations.png)
 
 *Early PID response showing oscillations during controller development.*
 
@@ -124,9 +114,7 @@ Seeing the response on a graph made the tuning much easier. It was immediately v
 
 I also assembled the first temporary test setup with the turbine and sensors, so from this point the controller was being tested with real airflow rather than only as software.
 
-<p align="center">
-  <img src="pictures/camera/first-pneumatic-test-bench.jpg" alt="First physical pneumatic test bench with turbine and sensors" width="360">
-</p>
+![First physical pneumatic test bench with turbine and sensors](pictures/camera/first-pneumatic-test-bench.jpg)
 
 *First physical pneumatic test bench with turbine and sensors.*
 
@@ -134,15 +122,11 @@ This was also where the main limitation of the D6F became obvious. The sensor is
 
 I wanted to keep the sensitivity of the D6F without limiting the entire tester to such a small total airflow.
 
-<p align="center">
-  <img src="pictures/chart/pid-step-response.png" alt="PID step response during the September 22 tuning session" width="680">
-</p>
+![PID step response during the September 22 tuning session](pictures/chart/pid-step-response.png)
 
 *PID step response during the September 22 tuning session.*
 
-<p align="center">
-  <img src="pictures/chart/pid-transient-and-terms.png" alt="PID transient response and individual controller terms" width="680">
-</p>
+![PID transient response and individual controller terms](pictures/chart/pid-transient-and-terms.png)
 
 *PID transient response and individual controller terms.*
 
@@ -158,9 +142,7 @@ For the pneumatic connection I did not want to invent another arbitrary connecto
 
 I went through the available dimensions and started reproducing the geometry in CAD. One of the important details was that the 22 mm connection is not simply a straight cylinder. The mating surface has a defined taper, which had to be included in the model.
 
-<p align="center">
-  <img src="pictures/technical/conical-connector-cad.png" alt="Section through the original FreeCAD adapter showing the tapered connector walls" width="680">
-</p>
+![Section through the original FreeCAD adapter showing the tapered connector walls](pictures/technical/conical-connector-cad.png)
 
 *FreeCAD section rendered for this update from [D6F-Resistance 0.0.1](https://github.com/Artisfera/Enclosure-leak-tester/blob/9b3057c/3d-models/D6F-Resistance/D6F-Resistance-0.0.1.FCStd), feature `Pocket005`, in commit `9b3057c` (September 28). This later saved model illustrates the conical connection discussed here; no September 23 CAD revision was found in Git.*
 
@@ -184,11 +166,9 @@ I continued developing the 22 mm connector and started building the main airflow
 
 I added the first version of a restriction in the main channel and prepared locations for a separate measurement path. The model quickly became more than just a simple adapter.
 
-<p align="center">
-  <img src="pictures/technical/airflow-channel-cad.png" alt="Longitudinal FreeCAD section exposing the main airflow channel and restriction" width="680">
-</p>
+![Longitudinal FreeCAD section exposing the main airflow channel and restriction](pictures/technical/airflow-channel-cad.png)
 
-*FreeCAD section rendered for this update from [D6F-Resistance 0.2.0 (20–11.61)](https://github.com/Artisfera/Enclosure-leak-tester/blob/9b3057c/3d-models/D6F-Resistance/D6F-Resistance-0.2.0-%2820-11.61%29.FCStd) in commit `9b3057c` (September 28). This later saved geometry illustrates the airflow path; it is not a view captured on September 24.*
+*FreeCAD section rendered for this update from [D6F-Resistance 0.2.0 (20-11.61)](https://github.com/Artisfera/Enclosure-leak-tester/blob/9b3057c/3d-models/D6F-Resistance/D6F-Resistance-0.2.0-%2820-11.61%29.FCStd) in commit `9b3057c` (September 28). This later saved geometry illustrates the airflow path; it is not a view captured on September 24.*
 
 I also ran into several FreeCAD problems along the way. Some sketches looked closed but were not actually valid closed profiles, and the solver occasionally reported conflicting constraints that were not obvious at first.
 
@@ -212,11 +192,9 @@ This allows the D6F to stay inside its normal measurement range while the comple
 
 I expanded the 22 mm adapter with the main restriction, pressure pickup locations, bypass channels and the sensor mounting geometry.
 
-<p align="center">
-  <img src="pictures/technical/d6f-bypass-cad.png" alt="Axonometric FreeCAD cutaway showing the main restriction and bypass connections" width="680">
-</p>
+![Axonometric FreeCAD cutaway showing the main restriction and bypass connections](pictures/technical/d6f-bypass-cad.png)
 
-*FreeCAD cutaway rendered for this update from [D6F-Resistance 0.2.0 (20–11.61)](https://github.com/Artisfera/Enclosure-leak-tester/blob/9b3057c/3d-models/D6F-Resistance/D6F-Resistance-0.2.0-%2820-11.61%29.FCStd) in commit `9b3057c` (September 28). It illustrates the later saved bypass geometry and sensor connection locations, not a September 25 screenshot or a model of the sensor internals.*
+*FreeCAD cutaway rendered for this update from [D6F-Resistance 0.2.0 (20-11.61)](https://github.com/Artisfera/Enclosure-leak-tester/blob/9b3057c/3d-models/D6F-Resistance/D6F-Resistance-0.2.0-%2820-11.61%29.FCStd) in commit `9b3057c` (September 28). It illustrates the later saved bypass geometry and sensor connection locations, not a September 25 screenshot or a model of the sensor internals.*
 
 The first restriction dimensions are only a calculated starting point. I do not expect the theoretical geometry alone to give an accurate final result. The printed surface, real channel dimensions, bypass resistance and the sensor itself will all affect the relationship between bypass flow and total flow.
 
@@ -236,15 +214,11 @@ Today I finished another, nearly final version of the D6F-P bypass adapter.
 
 I kept the possibility of testing different restriction diameters and prepared the variants needed for further experiments. The adapter itself was already developed enough that I could stop focusing on its basic geometry and move on to another part of the test setup.
 
-<p align="center">
-  <img src="pictures/camera/pneumatic-part-slicer-preview.jpg" alt="Slicer preview of a pneumatic part prepared for printing" width="360">
-</p>
+![Slicer preview of a pneumatic part prepared for printing](pictures/camera/pneumatic-part-slicer-preview.jpg)
 
 *Slicer preview of a pneumatic part prepared for printing.*
 
-<p align="center">
-  <img src="pictures/camera/tangled-filament-print-failure.jpg" alt="Tangled filament after an unsuccessful print" width="360">
-</p>
+![Tangled filament after an unsuccessful print](pictures/camera/tangled-filament-print-failure.jpg)
 
 *Tangled filament after an unsuccessful print.*
 
@@ -266,9 +240,7 @@ I also moved the PID controller out of `main.c` into a separate module. This mad
 
 I also started improving the ADC and SPI error handling. Earlier versions of the code mostly assumed that every read would succeed, which was acceptable during the first tests but not for a more complete device.
 
-<p align="center">
-  <img src="diagram/Enclosure-Leak-Sensor_0.2.0.svg" alt="Tester schematic version 0.2.0 documenting the firmware and hardware organisation" width="680">
-</p>
+![Tester schematic version 0.2.0 documenting the firmware and hardware organisation](diagram/Enclosure-Leak-Sensor_0.2.0.svg)
 
 *Existing repository diagram, version 0.2.0; used here to illustrate the firmware and schematic cleanup.*
 
@@ -284,9 +256,7 @@ After bringing the firmware to this stage, a larger measurement problem still re
 
 I started with a whiteboard brainstorming session and tried to develop a calibration method from first principles.
 
-<p align="center">
-  <img src="pictures/camera/airflow-calibration-brainstorming.jpg" alt="Whiteboard brainstorming of possible airflow calibration methods" width="540">
-</p>
+![Whiteboard brainstorming of possible airflow calibration methods](pictures/camera/airflow-calibration-brainstorming.jpg)
 
 *Whiteboard brainstorming of possible airflow calibration methods.*
 
@@ -308,15 +278,11 @@ I redesigned the lid into a cone-like shape. The geometry itself significantly i
 
 I also wanted to be able to test different wall thicknesses easily. This forced me to define the constraints in FreeCAD more carefully. Critical geometry such as the gasket interface and the 22 mm connector can remain unchanged while the wall thickness is treated as a parameter that can be adjusted independently.
 
-<p align="center">
-  <img src="pictures/camera/printed-lid-prototypes.jpg" alt="Printed lid prototypes from the earlier September 29 tests" width="360">
-</p>
+![Printed lid prototypes from the earlier September 29 tests](pictures/camera/printed-lid-prototypes.jpg)
 
 *Earlier lid prototypes photographed on September 29 (date from the original filename), shown here as context for the October 1 redesign.*
 
-<p align="center">
-  <img src="pictures/camera/lid-gasket-closeup.jpg" alt="Close-up of the lid and gasket interface from the September 29 tests" width="360">
-</p>
+![Close-up of the lid and gasket interface from the September 29 tests](pictures/camera/lid-gasket-closeup.jpg)
 
 *Lid and gasket interface photographed on September 29 (date from the original filename), illustrating the sealing interface discussed here.*
 
@@ -326,17 +292,13 @@ I also returned to the airflow calibration problem. I reversed the syringe idea.
 
 In practice, this means using an inverted container of known volume partially submerged in water. Incoming air raises the container, and the airflow can be calculated from the displaced gas volume and the elapsed time. A larger container allows the same principle to be used for much higher flow rates.
 
-<p align="center">
-  <img src="pictures/camera/bell-prover-concept-notes.jpg" alt="Whiteboard notes developing the inverted-container bell prover concept" width="540">
-</p>
+![Whiteboard notes developing the inverted-container bell prover concept](pictures/camera/bell-prover-concept-notes.jpg)
 
 *Whiteboard notes developing the inverted-container bell prover concept.*
 
 I also added the idea of a counterweight that can nearly balance the moving container and reduce the additional pressure required to lift it.
 
-<p align="center">
-  <img src="pictures/camera/bell-prover-counterweight-sketch.jpg" alt="Bell prover concept sketch with a counterweight" width="540">
-</p>
+![Bell prover concept sketch with a counterweight](pictures/camera/bell-prover-counterweight-sketch.jpg)
 
 *Bell prover concept sketch with a counterweight.*
 
@@ -358,9 +320,7 @@ Communication still uses SPI and the same basic Honeywell digital pressure forma
 
 The electronics and the required components are now assembled together. The next step is to adapt the controller to the real setup. The earlier PID settings looked reasonable during simpler tests, but the complete system now needs a more systematic way of choosing the parameters instead of relying only on trial and error.
 
-<p align="center">
-  <img src="pictures/camera/integrated-turbine-electronics.jpg" alt="Integrated turbine electronics and sensor wiring" width="540">
-</p>
+![Integrated turbine electronics and sensor wiring](pictures/camera/integrated-turbine-electronics.jpg)
 
 *Integrated turbine electronics and sensor wiring.*
 
@@ -370,9 +330,7 @@ The electronics and the required components are now assembled together. The next
 
 Today I focused on preparing for the D6F-P adapter calibration using the bell prover method and on automatically tuning the PID controller.
 
-<p align="center">
-  <img src="pictures/camera/pid-test-rig-with-bypass.jpg" alt="PID test rig with the D6F-P bypass installed" width="360">
-</p>
+![PID test rig with the D6F-P bypass installed](pictures/camera/pid-test-rig-with-bypass.jpg)
 
 *PID test rig with the D6F-P bypass installed.*
 
@@ -396,9 +354,7 @@ Since I didn't have much time left, I decided to use whatever materials I had av
 
 To supply air, I used tubing and elbows with the medical-style connectors I had already incorporated into the tester's design.
 
-<p align="center">
-  <img src="pictures/camera/bottle-calibration-tubing.jpg" alt="Bottle calibration setup with tubing and pneumatic connectors" width="360">
-</p>
+![Bottle calibration setup with tubing and pneumatic connectors](pictures/camera/bottle-calibration-tubing.jpg)
 
 *Bottle calibration setup with tubing and pneumatic connectors.*
 
@@ -406,9 +362,7 @@ The biggest compromise was the counterweight. Instead of building a separate mec
 
 It wasn't an ideal measurement setup, but it allowed me to build something functional and move from the original concept to real experiments.
 
-<p align="center">
-  <img src="pictures/camera/pneumatic-test-rig-top-view.jpg" alt="Top view of the pneumatic calibration test rig" width="360">
-</p>
+![Top view of the pneumatic calibration test rig](pictures/camera/pneumatic-test-rig-top-view.jpg)
 
 *Top view of the pneumatic calibration test rig.*
 
@@ -430,9 +384,7 @@ For the larger 1750 ml bottle, the results were as follows.
 
 `128, 158, 101, 111, 123, 192, 92, 152, 123, 179`
 
-<p align="center">
-  <img src="pictures/chart/bell-prover-repeatability.png" alt="Comparison of ten recorded readings for the 550 ml and 1750 ml bottles" width="680">
-</p>
+![Comparison of ten recorded readings for the 550 ml and 1750 ml bottles](pictures/chart/bell-prover-repeatability.png)
 
 *Chart created for this documentation update from the two ten-reading series recorded above in this journal. It is not an original screenshot taken during measurement. The reading unit is not specified in the journal; ml identifies bottle volume only.*
 
@@ -466,9 +418,7 @@ However, with the airflow reading available directly on the Panasonic's display,
 
 I assembled the final test setup and started measuring the airflow required to maintain a constant overpressure of 50 Pa inside the tested enclosure. I continued each measurement until the reading stabilised.
 
-<p align="center">
-  <img src="pictures/camera/final-leak-test-setup.jpg" alt="Final enclosure leak test setup used for measurements with the Panasonic airflow meter" width="360">
-</p>
+![Final enclosure leak test setup used for measurements with the Panasonic airflow meter](pictures/camera/final-leak-test-setup.jpg)
 
 *Final enclosure leak test setup used for measurements with the Panasonic airflow meter.*
 
