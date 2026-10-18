@@ -29,7 +29,7 @@ The final goal is to determine the enclosure leak rate from the airflow required
 - Nordic nRF52840
 - Zephyr / nRF Connect SDK
 - Omron D6F-P
-- Honeywell ABP pressure sensor
+- Honeywell pressure sensor
 - turbine control using PWM
 - custom PID controller
 - 3D-printed pneumatic parts designed in FreeCAD
@@ -82,7 +82,7 @@ The prototype used bottles, tubing and a drainage pipe. The bottle was counterba
 
 ## Journal
 
-I document the full development process in `JOURNAL.md`.
+I document the full development process in [`JOURNAL.md`](JOURNAL.md).
 
 It contains the successive stages of the project, problems encountered along the way, mechanical design changes, and firmware development starting from the first nRF52840 bring-up.
 

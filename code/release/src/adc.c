@@ -24,7 +24,7 @@ static struct adc_sequence sequence = {
         .channels = BIT(0),
         .buffer = &sample,
         .buffer_size = sizeof(sample),
-        .resolution = 8,
+        .resolution = 14,
         .oversampling = 2,
 };
 
@@ -66,6 +66,8 @@ int adc_read_flowrate(float *l_min)
     }
 
         int32_t voltage_mv = sample;
+        
+        *l_min = voltage_mv;
 
         return ADC_OK;
 }
