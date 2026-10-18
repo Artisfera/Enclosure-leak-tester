@@ -69,12 +69,7 @@ int adc_read_flowrate(float *l_min)
         int32_t voltage_mv = sample;
 
         float voltage = voltage_mv / 1000.0f;
-        *l_min = (((((0.094003f * voltage - 0.564312f) * voltage
-                  + 1.374705f) * voltage
-                  - 1.601495f) * voltage
-                  + 1.060657f) * voltage
-                  - 0.269996f)
-                  * 100.0f;
+        *l_min = voltage;
 
         return ADC_OK;
 }

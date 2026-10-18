@@ -26,8 +26,8 @@ int main(void)
     
     pidParm enclosure1 = {
         .Kp = 0.221764f,
-        .Ki = 0.041809f,
-        .Kd = 0.084869f,
+        .Ki = 0.05809f,
+        .Kd = 0.24869f,
         .SetPoint = 50.00f,
     };
     float enclosure1_output_start = 11.983146f;
@@ -131,13 +131,13 @@ int main(void)
         }    
 
          adc_read_flowrate(&l_min);
-            l_min = l_min - flow_zero;
+            //l_min = l_min - flow_zero;
 
          spi_read_pressure(&pressure_pa);
          pid_calc(pressure_pa, &pidTerm, enclosure1);
 
          duty = enclosure1_output_start + pidTerm;
-         duty = CLAMP(duty, 0.0f, 50.0f);
+         duty = CLAMP(duty, 0.0f, 100.0f);
          pwm_set_percent(duty);
 
           printf(">Pressure:%.4f,pidTerm:%.4f,duty:%.4f,l_min:%.4f\r\n",

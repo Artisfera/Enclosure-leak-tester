@@ -76,10 +76,11 @@ int main(void)
 
         count++;
 
-        printf("%d,%.4f,%.4f\r\n",
+        printf("%d,%.4f,%.4f,%4f\r\n",
             count,
             (double)pressure_pa,
-            (double)duty);
+            (double)duty,
+            l_min);
         pwm_set_percent(duty);
 
         int64_t now = k_uptime_get();
