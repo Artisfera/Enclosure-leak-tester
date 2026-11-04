@@ -455,3 +455,15 @@ And finally, something perhaps a little less technical, but just as important to
 After this internship, one thought has stayed with me more than ever.
 
 **The most important thing isn't whether you reach your goal. What matters more is what you learn along the way, because that's what will stay with you the longest.**
+
+# November 4 - Adding the missing wiring schematic
+
+Today I realised I had finished the internship journal but forgotten to include the wiring schematic for the leak tester. I drew it in KiCad to show how I had connected the sensors and the turbine control to the nRF52840 DK.
+
+I labelled the analog output from the Omron D6F airflow sensor, the SPI lines from the Honeywell pressure sensor and the PWM signal for the turbine. I also marked the 3.3 V and 5 V supplies so the signal and power connections can be followed on the same sheet.
+
+I added the KiCad project and PDF, SVG and DXF exports to the `schematic` folder. The PDF makes it possible to check the wiring without opening KiCad.
+
+![Leak tester wiring schematic showing the sensor connections and turbine control](schematic/Enclosure-leak-tester.svg)
+
+**Total time spent: 1 hour**
