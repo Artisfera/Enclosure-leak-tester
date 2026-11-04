@@ -38,7 +38,7 @@ The intended flow measurement uses an Omron D6F-P in a separate bypass. Most of 
 
 ## Mechanical design
 
-The pneumatic adapters and measuring lid were designed in FreeCAD. The lid uses a gasket to seal against the tested enclosure, and the adapters use 22 mm conical connections. Source models are under [`3d-models/`](3d-models/).
+The pneumatic adapters and measuring lid were designed in FreeCAD. The lid uses a gasket to seal against the tested enclosure, and the adapters use 22 mm conical connections. Editable FreeCAD source models are under [`3d-models/source/`](3d-models/source/), and the final STL exports are under [`3d-models/Final-stl-models/`](3d-models/Final-stl-models/).
 
 ![Close-up of the lid and gasket interface](pictures/camera/lid-gasket-closeup.jpg)
 
@@ -59,7 +59,15 @@ The release device-tree overlay uses the following nRF52840 signals:
 | PWM | `P1.01` | Turbine control signal |
 | SW0 | `sw0` devicetree alias | Measurement button |
 
-These are firmware configuration references, not a complete power wiring schematic. Voltage levels, turbine driver requirements and the exact wiring should be verified against the physical components before rebuilding the device. The system diagram and parts reference documents are in [`diagram/`](diagram/) and [`docs/`](docs/).
+A wiring schematic was added on November 4 using KiCad. It documents the connections between the nRF52840 DK, the Omron D6F-P airflow sensor, the Honeywell HSC pressure sensor and the turbine control. The schematic includes the analog airflow signal, SPI connections, PWM control signal, and 3.3 V and 5 V power connections.
+
+![Enclosure Leak Tester wiring schematic](schematic/Enclosure-leak-tester.svg)
+
+*Wiring schematic showing the sensor connections, turbine control and power connections.*
+
+The editable KiCad project and schematic are available in [`schematic/Enclosure-leak-tester/`](schematic/Enclosure-leak-tester/). The schematic is also available as [PDF](schematic/Enclosure-leak-tester.pdf), [SVG](schematic/Enclosure-leak-tester.svg) and [DXF](schematic/Enclosure-leak-tester.dxf).
+
+The listed pin mappings are based on the firmware configuration. Voltage levels, turbine driver requirements and the exact wiring should still be verified against the physical components before rebuilding the device. The conceptual system diagram and parts reference documents are in [`diagram/`](diagram/) and [`docs/`](docs/).
 
 To work with the firmware, open `code/release/` as a Zephyr / nRF Connect SDK application, select the nRF52840 DK board supported by your installed SDK, and build/flash it using the standard Zephyr workflow. The software is a documented development snapshot, not a validated, calibrated product release.
 
@@ -91,8 +99,8 @@ The detailed, itemised parts list is in **[`BOM.csv`](BOM.csv)**. It distinguish
 | Omron D6F-P0001A1 | 1 | [Sensor documentation](docs/D6F-P/D6F-P.pdf) |
 | Honeywell HSC 002ND differential sensor | 1 | [HSC reference document](docs/HSCDRRD002NDSA3/3946815.pdf) |
 | PWM-driven turbine / blower | 1 | [Integration photo](pictures/camera/integrated-turbine-electronics.jpg); exact model to confirm |
-| 3D-printed D6F bypass adapter | 1 design | [Editable model](3d-models/D6F-Resistance/D6F-Resistance-0.3.0-%2820-11.61%29.FCStd) |
-| 3D-printed lid with sealing gasket | 1 design | [Editable model](3d-models/measuring-lid-gasket/measuring-lid-gasket_1.0.0.FCStd) |
+| 3D-printed D6F bypass adapter | 1 design | [Editable model](3d-models/source/D6F-Resistance/D6F-Resistance-0.3.0-%2820-11.61%29.FCStd) |
+| 3D-printed lid with sealing gasket | 1 design | [Editable model](3d-models/source/measuring-lid-gasket/measuring-lid-gasket_1.0.0.FCStd) |
 | Gasket, tubing, connectors and wiring | Quantities to confirm | See `BOM.csv` for references and missing specifications |
 | Panasonic FM-215-8 | 1, external test instrument | [Meter documentation](docs/FM-215-8/FM-200-SERIES-INS-EN.pdf); not a required built-in D6F component |
 
@@ -107,14 +115,16 @@ The detailed, itemised parts list is in **[`BOM.csv`](BOM.csv)**. It distinguish
 
 ## Journal
 
-I recorded the development process in **[`JOURNAL.md`](JOURNAL.md)**, including the design decisions, unsuccessful experiments, source code history, mechanical work and final tests. The journal has 18 entries and logs 120 hours. Images use relative Markdown links so they work in the cloned repository and can be rewritten by Forge's Git journal synchronisation.
+I recorded the development process in **[`JOURNAL.md`](JOURNAL.md)**, including the design decisions, unsuccessful experiments, source code history, mechanical work, final tests and the wiring schematic added on November 4. The journal has 19 entries and logs 121 hours. Images use relative Markdown links so they work in the cloned repository and can be rewritten by Forge's Git journal synchronisation.
 
 ## Repository
 
 - [`code/release/`](code/release/) contains the final development-stage firmware snapshot
 - [`code/stability-test/`](code/stability-test/) and [`code/ai-relay-autotune-test/`](code/ai-relay-autotune-test/) contain test or experimental branches of the work
-- [`3d-models/`](3d-models/) contains editable CAD models and printable parts
-- [`diagram/`](diagram/) contains system diagrams
+- [`3d-models/source/`](3d-models/source/) contains editable FreeCAD models
+- [`3d-models/Final-stl-models/`](3d-models/Final-stl-models/) contains final STL exports
+- [`diagram/`](diagram/) contains conceptual system diagrams
+- [`schematic/`](schematic/) contains the KiCad wiring schematic and its PDF, SVG and DXF exports
 - [`docs/`](docs/) contains component documentation and reference material
 - [`JOURNAL.md`](JOURNAL.md) documents the development timeline
 - [`BOM.csv`](BOM.csv) is the parts inventory for rebuilding and reviewing the project
